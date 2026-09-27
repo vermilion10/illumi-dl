@@ -137,7 +137,7 @@ probably present for unreleased voices too. Not confirmed.
 
 ## API transport
 
-Module `96525`. Every call goes to `API_ROOT` (`https://site.invalid/`)
+Module `96525`. Every call goes to `API_ROOT` (the game API host)
 as a single POST:
 
 1. The client writes a raw HTTP/1.1 request as text: `GET /album/top HTTP/1.1`,
@@ -275,17 +275,17 @@ Login chain, all from the cloud host:
 
 | Step | Request | Result |
 |---|---|---|
-| 1 | `GET platform.invalid/sessions/user_code?app_id=1&ts=<ms>` with cookie `<session cookie>` | `200`, `{"token": "<game JWT>"}`, valid about 3 minutes |
+| 1 | `GET <platformRoot>/sessions/user_code?app_id=1&ts=<ms>` with the session cookie | `200`, `{"token": "<game JWT>"}`, valid about 3 minutes |
 | 2 | `POST login` with `Authorization: <game JWT>` | `200`, `{isCreated, user}`, first `X-Sessionid` arrives |
 | 3 | `GET gameTop` | `200`, `X-Sessionid` and `X-Tutorial-Progress-Status` |
 | 4 | `GET album/top` | `200`, 28 characters |
 | 5 | `POST characterAlbums/characters/1` | `200`, full album |
 
-`<session cookie>` is a 32-character opaque value on `platform.invalid`. It is the
+The session cookie is a 32-character opaque value on the platform host. It is the
 long-lived credential; the tool can mint a fresh game token from it on every run.
-A different JWT from `platform.invalid` (claims `user_id`, `bn_user_id`,
+A different JWT from the platform portal (claims `user_id`, `bn_user_id`,
 `token_created_at`) is not accepted by the game, and a stale or foreign
-`<session cookie>` gets a guest identity (`isCreated: false`), which makes album calls
+The session cookie gets a guest identity (`isCreated: false`), which makes album calls
 fail with `1010`.
 
 Character 001 album:

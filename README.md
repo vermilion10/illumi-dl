@@ -8,6 +8,14 @@ It reads the browser client's own asset map, mirrors files from the game CDN,
 decrypts the text assets, and sorts everything into per-character, per-card and
 per-story folders. No login, game install or third-party data is needed.
 
+## Setup
+
+illumi-dl doesn't include the game's addresses, the platform's cookie name or the
+text-asset key, and the repository contains no game assets. Before the first run,
+copy `client.example.json` to `%APPDATA%\illumi-dl\client.json` (or next to the
+executable) and fill in `siteRoot`, `platformRoot`, `sessionCookie` and `assetKey`.
+Without it, every command that needs one of these reports that the file is missing.
+
 ## Requirements
 
 - .NET 8 SDK
@@ -89,13 +97,13 @@ their hashed path. See [albums](#albums).
 
 ### albums
 
-Logs in with an platform account and reads every character album, which lists each
+Logs in with a platform account and reads every character album, which lists each
 card with its hash whether the account owns it or not. It needs the account's
-`<session cookie>` cookie in the `ILLUMI_SESSION` environment variable:
+session cookie (`sessionCookie` in `client.json`) in the `ILLUMI_SESSION` environment variable:
 
 1. Open the game in a browser, logged in, past the opening.
-2. In DevTools, open a `platform.invalid/sessions/ping` request and copy the
-   `<session cookie>` value from its `cookie` request header.
+2. In DevTools, open a `<platformRoot>/sessions/ping` request and copy the
+   session cookie value from its `cookie` request header.
 3. Set `ILLUMI_SESSION` to that value and run `illumi-dl albums`.
 
 ```sh
@@ -164,7 +172,7 @@ marked with `>`, and the matching `voice/<id>.m4a` file when the line is voiced.
 
 ## How the CDN works
 
-Assets live at `https://site.invalid/assets/`. The client's
+Assets live at `<siteRoot>/assets/`. The client's
 `resource_hash` WebAssembly module handles filenames and text decryption, and
 this tool reimplements both in C#.
 
