@@ -27,8 +27,7 @@ public static class Program
 
     private static readonly Option<string> AssetRootOption = new("--asset-root")
     {
-        Description = "CDN asset root URL",
-        DefaultValueFactory = _ => CdnHttpClient.DefaultAssetRoot,
+        Description = "CDN asset root URL (default: the configured address)",
         Recursive = true,
     };
 
@@ -46,7 +45,17 @@ public static class Program
         root.Subcommands.Add(BuildNamesCommand());
         root.Subcommands.Add(BuildExtractCommand());
 
-        return await root.Parse(args).InvokeAsync();
+        // A missing client.json is reported as one line, not as a stack trace; anything else still goes to the
+        // default handler.
+        try
+        {
+            return await root.Parse(args).InvokeAsync(new InvocationConfiguration { EnableDefaultExceptionHandler = false });
+        }
+        catch (FileNotFoundException e) when (!ClientValues.IsConfigured)
+        {
+            Console.Error.WriteLine(e.Message);
+            return 1;
+        }
     }
 
     private static Workspace WorkspaceFrom(ParseResult parseResult) =>
@@ -54,7 +63,7 @@ public static class Program
 
     private static string AssetRootFrom(ParseResult parseResult)
     {
-        var value = parseResult.GetValue(AssetRootOption)!;
+        var value = parseResult.GetValue(AssetRootOption) ?? CdnHttpClient.DefaultAssetRoot;
         return value.EndsWith('/') ? value : value + "/";
     }
 
@@ -175,7 +184,7 @@ public static class Program
             if (string.IsNullOrEmpty(session))
             {
                 Console.Error.WriteLine(
-                    $"Set {SessionVariable} to the <session cookie> cookie sent to platform.invalid while logged in.");
+                    $"Set {SessionVariable} to the {ClientValues.SessionCookie} cookie sent to {new Uri(ClientValues.PlatformRoot).Host} while logged in.");
                 return 1;
             }
 

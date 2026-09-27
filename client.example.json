@@ -1,0 +1,10 @@
+{
+  // The web client's root (serves index.html, env.js and the app scripts), with a trailing slash.
+  "siteRoot": "",
+  // The account platform that mints game tokens from a session cookie, used by `albums`.
+  "platformRoot": "",
+  // The platform's session cookie name.
+  "sessionCookie": "",
+  // The XOR key for encrypted text assets, as a plain string.
+  "assetKey": ""
+}

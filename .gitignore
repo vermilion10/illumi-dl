@@ -432,3 +432,6 @@ FodyWeavers.xsd
 # organized tree that `download` and `extract` write.
 /data/
 /output/
+
+# The server addresses and asset key, kept out of the repository (see client.example.json).
+client.json

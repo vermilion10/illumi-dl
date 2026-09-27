@@ -20,8 +20,8 @@ public sealed record ApiResponse(int StatusCode, JsonNode? Body)
 /// </summary>
 public sealed class GameApiClient : IDisposable
 {
-    private const string PlatformRoot = "https://site.invalid";
-    private const string SiteOrigin = "https://site.invalid";
+    private static string PlatformRoot => ClientValues.PlatformRoot;
+    private static string SiteOrigin => ClientValues.SiteRoot.TrimEnd('/');
     private const string UserAgent =
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0 Safari/537.36";
 
@@ -163,7 +163,7 @@ public sealed class GameApiClient : IDisposable
     {
         var url = $"{PlatformRoot}/sessions/user_code?app_id={_bundle.GameId}&ts={DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}";
         using var request = new HttpRequestMessage(HttpMethod.Get, url);
-        request.Headers.Add("Cookie", "<session cookie>=" + _platformSession);
+        request.Headers.Add("Cookie", ClientValues.SessionCookie + "=" + _platformSession);
         request.Headers.Add("X-Requested-With", "XMLHttpRequest");
 
         using var response = await _http.SendAsync(request, cancellationToken);
@@ -171,7 +171,7 @@ public sealed class GameApiClient : IDisposable
         if (!response.IsSuccessStatusCode)
         {
             throw new InvalidOperationException(
-                $"The platform refused the session (HTTP {(int)response.StatusCode}); copy a fresh <session cookie>.");
+                $"The platform refused the session (HTTP {(int)response.StatusCode}); copy a fresh {ClientValues.SessionCookie}.");
         }
 
         var token = JsonNode.Parse(text)?["token"]?.GetValue<string>()
@@ -181,8 +181,8 @@ public sealed class GameApiClient : IDisposable
         if (claims?["is_guest"]?.GetValue<bool>() == true || claims?["is_game_user_registered"]?.GetValue<bool>() == false)
         {
             throw new InvalidOperationException(
-                "ILLUMI_SESSION maps to a guest identity, not your account. Copy <session cookie> from a " +
-                "platform.invalid request while logged in.");
+                $"ILLUMI_SESSION maps to a guest identity, not your account. Copy {ClientValues.SessionCookie} from a " +
+                $"{new Uri(PlatformRoot).Host} request while logged in.");
         }
 
         return token;

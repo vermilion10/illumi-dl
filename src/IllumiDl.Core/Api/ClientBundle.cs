@@ -13,7 +13,7 @@ public sealed partial record ClientBundle(
     string EmVersion,
     string CodecChunk)
 {
-    private const string SiteRoot = "https://site.invalid/";
+    private static string SiteRoot => ClientValues.SiteRoot;
 
     public string CodecPath(string dataRoot) => Path.Combine(dataRoot, "client", CodecChunk);
 

@@ -5,7 +5,7 @@ namespace IllumiDl.Core.Download;
 /// <summary> one pooled <see cref="HttpClient"/> for the process. the CDN is public CloudFront with no region lock </summary>
 public static class CdnHttpClient
 {
-    public const string DefaultAssetRoot = "https://site.invalid/assets/";
+    public static string DefaultAssetRoot => ClientValues.AssetRoot;
 
     private static readonly Lazy<HttpClient> LazyClient = new(Create);
 
@@ -33,7 +33,7 @@ public static class CdnHttpClient
 
         client.DefaultRequestHeaders.UserAgent.ParseAdd(
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0 Safari/537.36");
-        client.DefaultRequestHeaders.Referrer = new Uri("https://site.invalid/");
+        client.DefaultRequestHeaders.Referrer = new Uri(ClientValues.SiteRoot);
 
         return client;
     }

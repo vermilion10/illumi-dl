@@ -7,9 +7,8 @@ namespace IllumiDl.Core.Crypto;
 /// <summary> native port of the client's <c>resource_hash</c> wasm: CDN filenames and the text-asset cipher </summary>
 public static class AssetCrypto
 {
-    // The wasm embeds this as one string; the whole thing is the XOR key.
-    private static readonly byte[] Key = Encoding.ASCII.GetBytes(
-        "");
+    // Read on first use, so a missing key only fails the commands that decrypt.
+    private static readonly Lazy<byte[]> LazyKey = new(() => Encoding.ASCII.GetBytes(ClientValues.AssetKey));
 
     /// <summary> media keeps its extension on the CDN, everything else is a bare hash </summary>
     private static readonly HashSet<string> KeepExtension = new(StringComparer.OrdinalIgnoreCase) { ".mp3", ".mp4", ".m4a" };
@@ -37,7 +36,7 @@ public static class AssetCrypto
         var buffer = data.ToArray();
         for (var i = 0; i < buffer.Length; i++)
         {
-            buffer[i] ^= Key[i % Key.Length];
+            buffer[i] ^= LazyKey.Value[i % LazyKey.Value.Length];
         }
 
         var offset = GzipHeaderLength(buffer);
