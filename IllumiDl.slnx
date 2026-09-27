@@ -1,0 +1,6 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/IllumiDl.Cli/IllumiDl.Cli.csproj" />
+    <Project Path="src/IllumiDl.Core/IllumiDl.Core.csproj" />
+  </Folder>
+</Solution>
